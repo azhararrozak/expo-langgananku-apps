@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { Pressable, Image } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { colors } from 'utils/color';
 
@@ -6,8 +7,11 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.secondary,
+        tabBarActiveTintColor: colors.primary.DEFAULT,
+        tabBarInactiveTintColor: colors.secondary.DEFAULT,
+        sceneStyle: {
+          backgroundColor: colors.surface.DEFAULT,
+        },
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopWidth: 1,
@@ -21,7 +25,7 @@ export default function TabLayout() {
           fontWeight: '600',
         },
         headerStyle: {
-          backgroundColor: '#ffffff',
+          backgroundColor: colors.surface.DEFAULT,
         },
         headerTitleStyle: {
           fontWeight: '700',
@@ -32,15 +36,37 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
+          headerTitle: 'Langgananku',
+          headerLeft: () => (
+            <Image
+              source={require('../../assets/icon.png')}
+              style={{ width: 28, height: 28, marginLeft: 16, borderRadius: 6 }}
+              resizeMode="contain"
+            />
+          ),
+          headerRight: () => (
+            <Pressable style={{ marginRight: 16 }}>
+              <MaterialIcons name="notifications-none" size={24} color={colors.outline.DEFAULT} />
+            </Pressable>
+          ),
           tabBarIcon: ({ color, size }) => <MaterialIcons name="home" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="feed"
+        name="subscription"
         options={{
-          title: 'Feed',
+          title: 'Subscription',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="dynamic-feed" size={size} color={color} />
+            <MaterialIcons name="subscriptions" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="reports"
+        options={{
+          title: 'Reports',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="bar-chart" size={size} color={color} />
           ),
         }}
       />

@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as NavigationBar from 'expo-navigation-bar';
 import * as SplashScreen from 'expo-splash-screen';
+import { colors } from '../utils/color';
 
 import '../global.css';
 
@@ -24,7 +25,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.surface.DEFAULT } }}>
         <Stack.Screen name="(tabs)" />
       </Stack>
       <StatusBar style="auto" />
