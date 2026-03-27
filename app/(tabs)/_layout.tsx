@@ -56,6 +56,7 @@ export default function TabLayout() {
         name="subscription"
         options={{
           title: 'Subscription',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="subscriptions" size={size} color={color} />
           ),

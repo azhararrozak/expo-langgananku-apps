@@ -1,6 +1,7 @@
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import React from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '../../../utils/color';
 
@@ -11,9 +12,14 @@ const SubscriptionScreen = () => {
         <Text className="mb-2 font-label text-sm uppercase tracking-widest text-on-surface-variant">
           Portofolio Overview
         </Text>
-        <Text className="text-on-surface w-[15rem] font-headline text-4xl font-extrabold tracking-tight">
+        <View className="flex-row items-center justify-between">
+          <Text className="text-on-surface w-[15rem] font-headline text-4xl font-extrabold tracking-tight">
           Active Subscriptions
         </Text>
+        <Pressable onPress={() => router.push('/subscription/create')}>
+          <MaterialIcons name="add" size={24} color={colors.primary.DEFAULT} />
+        </Pressable>
+        </View>
       </View>
 
       {/* Entertainment & Media */}
@@ -23,6 +29,7 @@ const SubscriptionScreen = () => {
         </Text>
 
         {/* Netflix Card */}
+        <Pressable onPress={() => router.push('/subscription/netflix')}>
         <View className="w-full overflow-hidden rounded-[2rem] shadow-xl">
           <LinearGradient
             colors={['#E50914', '#831010']}
@@ -72,6 +79,7 @@ const SubscriptionScreen = () => {
             </View>
           </LinearGradient>
         </View>
+        </Pressable>
 
         {/* Spotify Card */}
         <View className="w-full overflow-hidden rounded-[2rem] shadow-xl">
