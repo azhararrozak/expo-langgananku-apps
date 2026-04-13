@@ -1,11 +1,49 @@
-import { View, Text, ScrollView, Pressable } from 'react-native';
-import React from 'react';
+import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
+import React, { useEffect } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '../../../utils/color';
+import { useSubscriptionStore } from '../../../store/useSubscriptionStore';
+
+const getCardStyle = (name: string): readonly [string, string, ...string[]] => {
+  const n = name.toLowerCase();
+  if (n.includes('netflix')) return ['#E50914', '#831010'];
+  if (n.includes('spotify')) return ['#1DB954', '#121212'];
+  if (n.includes('disney')) return ['#0B0F2C', '#1A3673'];
+  if (n.includes('hbo')) return ['#5A058A', '#1F0230'];
+  if (n.includes('youtube')) return ['#FF0000', '#590000'];
+  return [colors.primary.DEFAULT, colors.primary.container];
+}
+
+const getCardIcon = (name: string): any => {
+  const n = name.toLowerCase();
+  if (n.includes('netflix') || n.includes('hbo') || n.includes('disney')) return 'movie';
+  if (n.includes('spotify') || n.includes('music')) return 'music-note';
+  if (n.includes('youtube')) return 'play-circle-filled';
+  return 'stars';
+}
+
+const getUtilityIcon = (name: string): any => {
+  const n = name.toLowerCase();
+  if (n.includes('gym') || n.includes('fit')) return 'fitness-center';
+  if (n.includes('cloud') || n.includes('drive') || n.includes('karya')) return 'cloud';
+  if (n.includes('internet') || n.includes('wifi')) return 'wifi';
+  return 'receipt-long';
+}
 
 const SubscriptionScreen = () => {
+  const { subscriptions, isLoading, fetchSubscriptions } = useSubscriptionStore();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchSubscriptions();
+    }, [])
+  );
+
+  const entertainmentSubs = subscriptions.filter(sub => ['Hiburan', 'Musik'].includes(sub.category || ''));
+  const utilitySubs = subscriptions.filter(sub => !['Hiburan', 'Musik'].includes(sub.category || ''));
+
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <View className="w-full flex-col p-4">
@@ -16,208 +54,141 @@ const SubscriptionScreen = () => {
           <Text className="text-on-surface w-[15rem] font-headline text-4xl font-extrabold tracking-tight">
           Active Subscriptions
         </Text>
-        <Pressable onPress={() => router.push('/subscription/create')}>
+        <Pressable onPress={() => router.push('/subscription/create')} className="bg-primary/10 p-2 rounded-full">
           <MaterialIcons name="add" size={24} color={colors.primary.DEFAULT} />
         </Pressable>
         </View>
       </View>
 
-      {/* Entertainment & Media */}
-      <View className="gap-6 px-4 pb-12">
-        <Text className="px-1 font-headline text-sm font-bold uppercase tracking-widest text-on-surface-variant">
-          Entertainment & Media
-        </Text>
-
-        {/* Netflix Card */}
-        <Pressable onPress={() => router.push('/subscription/netflix')}>
-        <View className="w-full overflow-hidden rounded-[2rem] shadow-xl">
-          <LinearGradient
-            colors={['#E50914', '#831010']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="relative h-56 w-full p-8"
-          >
-            {/* Background Icon */}
-            <View className="absolute right-0 top-0 p-8 opacity-20">
-              <MaterialIcons name="movie" size={80} color="white" />
-            </View>
-
-            {/* Card Content */}
-            <View className="z-10 flex-1 justify-between">
-              {/* Top Row */}
-              <View className="flex-row items-start justify-between">
-                <View className="rounded-lg bg-white/20 px-3 py-1">
-                  <Text className="text-xs font-bold uppercase tracking-tighter text-white">
-                    Premium UHD
-                  </Text>
-                </View>
-                <View className="h-8 w-12 rounded-md bg-yellow-400/80" />
-              </View>
-
-              {/* Bottom Content */}
-              <View>
-                <Text className="mb-4 font-mono text-xl tracking-[0.3em] text-white">
-                  •••• •••• •••• 4012
-                </Text>
-                <View className="flex-row items-end justify-between">
-                  <View className="gap-1">
-                    <Text className="font-label text-[10px] uppercase tracking-widest text-white/70">
-                      Cardholder
-                    </Text>
-                    <Text className="font-headline text-sm font-bold text-white">
-                      ALEXANDER RIVERA
-                    </Text>
-                  </View>
-                  <View className="items-end gap-1">
-                    <Text className="font-label text-[10px] uppercase tracking-widest text-white/70">
-                      Valid Thru
-                    </Text>
-                    <Text className="font-mono text-sm text-white">12/26</Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </LinearGradient>
-        </View>
-        </Pressable>
-
-        {/* Spotify Card */}
-        <View className="w-full overflow-hidden rounded-[2rem] shadow-xl">
-          <LinearGradient
-            colors={['#1DB954', '#121212']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="relative h-56 w-full p-8"
-          >
-            {/* Background Icon */}
-            <View className="absolute right-0 top-0 p-8 opacity-20">
-              <MaterialIcons name="music-note" size={80} color="white" />
-            </View>
-
-            {/* Card Content */}
-            <View className="z-10 flex-1 justify-between">
-              {/* Top Row */}
-              <View className="flex-row items-start justify-between">
-                <View className="rounded-lg bg-black/40 px-3 py-1">
-                  <Text className="text-xs font-bold uppercase tracking-tighter text-white">
-                    Family Plan
-                  </Text>
-                </View>
-                <View className="h-8 w-12 items-center justify-center rounded-md bg-slate-300/60">
-                  <View className="h-4 w-8 rounded border border-white/30" />
-                </View>
-              </View>
-
-              {/* Bottom Content */}
-              <View>
-                <Text className="mb-4 font-mono text-xl tracking-[0.3em] text-white">
-                  •••• •••• •••• 8892
-                </Text>
-                <View className="flex-row items-end justify-between">
-                  <View className="gap-1">
-                    <Text className="font-label text-[10px] uppercase tracking-widest text-white/70">
-                      Cardholder
-                    </Text>
-                    <Text className="font-headline text-sm font-bold text-white">
-                      ALEXANDER RIVERA
-                    </Text>
-                  </View>
-                  <View className="items-end gap-1">
-                    <Text className="font-label text-[10px] uppercase tracking-widest text-white/70">
-                      Valid Thru
-                    </Text>
-                    <Text className="font-mono text-sm text-white">05/25</Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </LinearGradient>
-        </View>
-      </View>
-
-      {/* Utilities & Services */}
-      <View className="gap-8 px-4 pb-12">
-        <Text className="px-1 font-headline text-sm font-bold uppercase tracking-widest text-on-surface-variant">
-          Utilities & Services
-        </Text>
-
-        <View className="flex-row gap-4">
-          {/* Gym Receipt */}
-          <View className="flex-1 rounded-2xl bg-white px-6 pb-10 pt-8 shadow-md">
-            <View className="mb-6 items-center">
-              <MaterialIcons name="fitness-center" size={28} color={colors.outline.DEFAULT} />
-              <Text className="mt-2 font-headline text-lg font-extrabold uppercase tracking-widest">
-                FITNESS FIRST
+      {isLoading && subscriptions.length === 0 ? (
+        <ActivityIndicator size="large" color={colors.primary.DEFAULT} className="mt-10" />
+      ) : (
+        <>
+          {/* Entertainment & Media */}
+          {entertainmentSubs.length > 0 && (
+            <View className="gap-6 px-4 pb-12">
+              <Text className="px-1 font-headline text-sm font-bold uppercase tracking-widest text-on-surface-variant">
+                Entertainment & Media
               </Text>
-              <Text className="text-[10px] text-on-surface-variant">TRANS #99283-ID-2024</Text>
+
+              {entertainmentSubs.map((sub) => (
+                <Pressable key={sub.id} onPress={() => router.push(`/subscription/${sub.id}`)}>
+                  <View className="w-full overflow-hidden rounded-[2rem] shadow-xl">
+                    <LinearGradient
+                      colors={getCardStyle(sub.name)}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      className="relative h-56 w-full p-8"
+                    >
+                      {/* Background Icon */}
+                      <View className="absolute right-0 top-0 p-8 opacity-20">
+                        <MaterialIcons name={getCardIcon(sub.name)} size={80} color="white" />
+                      </View>
+
+                      {/* Card Content */}
+                      <View className="z-10 flex-1 justify-between">
+                        {/* Top Row */}
+                        <View className="flex-row items-start justify-between">
+                          <View className="rounded-lg bg-white/20 px-3 py-1">
+                            <Text className="text-xs font-bold uppercase tracking-tighter text-white">
+                              {sub.category || 'Media'}
+                            </Text>
+                          </View>
+                          <View className="flex-row items-center justify-center p-1 rounded-md bg-white/20">
+                             <Text className="text-[10px] uppercase font-bold text-white px-1">{sub.billingCycle}</Text>
+                          </View>
+                        </View>
+
+                        {/* Bottom Content */}
+                        <View>
+                          <Text className="mb-4 font-mono text-2xl font-bold tracking-widest text-white">
+                            Rp {sub.cost.toLocaleString('id-ID')}
+                          </Text>
+                          <View className="flex-row items-end justify-between">
+                            <View className="gap-1 flex-1 pr-4">
+                              <Text className="font-label text-[10px] uppercase tracking-widest text-white/70">
+                                Subscription
+                              </Text>
+                              <Text className="font-headline text-sm font-bold text-white" numberOfLines={1}>
+                                {sub.name.toUpperCase()}
+                              </Text>
+                            </View>
+                            <View className="items-end gap-1">
+                              <Text className="font-label text-[10px] uppercase tracking-widest text-white/70">
+                                Next Due
+                              </Text>
+                              <Text className="font-mono text-sm text-white">
+                                {new Date(sub.nextBillingDate).toLocaleDateString('en-GB', { month: '2-digit', year: '2-digit' })}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                    </LinearGradient>
+                  </View>
+                </Pressable>
+              ))}
             </View>
+          )}
 
-            <View className="my-4 border-t border-dashed border-outline-variant" />
-
-            <View className="gap-2">
-              <View className="flex-row justify-between">
-                <Text className="font-mono text-sm">MEMBERSHIP</Text>
-                <Text className="font-mono text-sm">$45.00</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="font-mono text-sm">TAX (10%)</Text>
-                <Text className="font-mono text-sm">$4.50</Text>
-              </View>
-
-              <View className="my-2 border-t border-dashed border-outline-variant" />
-
-              <View className="flex-row justify-between">
-                <Text className="text-base font-bold">TOTAL</Text>
-                <Text className="text-base font-bold">$49.50</Text>
-              </View>
-            </View>
-
-            <View className="mt-6 items-center">
-              <Text className="font-mono text-[10px] uppercase text-on-surface-variant">
-                Next Due: OCT 12, 2024
+          {/* Utilities & Services */}
+          {utilitySubs.length > 0 && (
+            <View className="gap-6 px-4 pb-12">
+              <Text className="px-1 font-headline text-sm font-bold uppercase tracking-widest text-on-surface-variant">
+                Utilities & Services
               </Text>
-            </View>
-          </View>
 
-          {/* iCloud Receipt */}
-          <View className="flex-1 rounded-2xl bg-white px-6 pb-10 pt-8 shadow-md">
-            <View className="mb-6 items-center">
-              <MaterialIcons name="cloud" size={28} color={colors.outline.DEFAULT} />
-              <Text className="mt-2 font-headline text-lg font-extrabold uppercase tracking-widest">
-                ICLOUD+ 2TB
+              <View className="flex-row flex-wrap gap-4">
+                {utilitySubs.map((sub) => (
+                  <Pressable key={sub.id} onPress={() => router.push(`/subscription/${sub.id}`)} className="min-w-[46%] flex-1">
+                    <View className="flex-1 rounded-2xl bg-white px-4 pb-6 pt-6 shadow-md border border-gray-50">
+                      <View className="mb-4 items-center">
+                        <MaterialIcons name={getUtilityIcon(sub.name)} size={28} color={colors.outline.DEFAULT} />
+                        <Text className="mt-2 text-center font-headline text-base font-extrabold uppercase tracking-widest" numberOfLines={1}>
+                          {sub.name}
+                        </Text>
+                        <Text className="text-[10px] uppercase text-on-surface-variant text-center">
+                          {sub.category || 'Utility'}
+                        </Text>
+                      </View>
+
+                      <View className="my-2 border-t border-dashed border-outline-variant/50" />
+
+                      <View className="gap-2 mt-2">
+                        <View className="flex-col pb-2 border-b border-gray-100 items-center">
+                           <Text className="font-mono text-[10px] text-gray-500 mb-1">{sub.billingCycle.toUpperCase()}</Text>
+                           <Text className="font-bold text-primary text-sm">
+                             Rp {sub.cost.toLocaleString('id-ID')}
+                           </Text>
+                        </View>
+                        
+                        <View className="mt-1 items-center">
+                           <Text className="text-[9px] uppercase font-bold text-on-surface-variant">Next Payment</Text>
+                           <Text className="font-mono text-xs font-bold text-gray-700 mt-1">
+                             {new Date(sub.nextBillingDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                           </Text>
+                        </View>
+                      </View>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {subscriptions.length === 0 && !isLoading && (
+            <View className="px-4 mt-6 items-center">
+              <MaterialIcons name="inbox" size={48} color={colors.outline.variant} />
+              <Text className="mt-4 text-center text-on-surface-variant text-base">
+                Belum ada langganan yang ditambahkan.
               </Text>
-              <Text className="text-[10px] text-on-surface-variant">INV #APPLE-2938-X</Text>
+              <Pressable onPress={() => router.push('/subscription/create')} className="mt-4 rounded-full bg-primary px-6 py-3">
+                <Text className="text-white font-bold">Tambah Sekarang</Text>
+              </Pressable>
             </View>
-
-            <View className="my-4 border-t border-dashed border-outline-variant" />
-
-            <View className="gap-2">
-              <View className="flex-row justify-between">
-                <Text className="font-mono text-sm">STORAGE</Text>
-                <Text className="font-mono text-sm">$9.99</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="font-mono text-sm">VAT</Text>
-                <Text className="font-mono text-sm">$0.00</Text>
-              </View>
-
-              <View className="my-2 border-t border-dashed border-outline-variant" />
-
-              <View className="flex-row justify-between">
-                <Text className="text-base font-bold">TOTAL</Text>
-                <Text className="text-base font-bold">$9.99</Text>
-              </View>
-            </View>
-
-            <View className="mt-6 items-center">
-              <Text className="font-mono text-[10px] uppercase text-on-surface-variant">
-                Next Due: OCT 21, 2024
-              </Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
+          )}
+        </>
+      )}
     </ScrollView>
   );
 };

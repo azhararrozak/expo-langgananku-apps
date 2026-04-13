@@ -7,7 +7,11 @@ import { colors } from '../../utils/color';
 export default function HomeScreen() {
   return (
     // <SafeAreaView className="flex-1" edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
       <View className="flex-col items-center gap-4 rounded-xl p-4">
         <View className="w-full overflow-hidden rounded-[30px]">
           <LinearGradient

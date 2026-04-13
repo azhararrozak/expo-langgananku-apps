@@ -1,24 +1,65 @@
-import { View, Text, ScrollView, TextInput, Image, Pressable, Switch, Platform } from 'react-native';
+import { View, Text, ScrollView, TextInput, Image, Pressable, Switch, Platform, Alert, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '../../../utils/color';
+import { useSubscriptionStore } from '../../../store/useSubscriptionStore';
 
-const categories = ['Streaming', 'Music', 'Gym', 'Cloud', 'Productivity'];
+const categories = ['Hiburan', 'Musik', 'Kesehatan & Olahraga', 'Cloud & Storage', 'Produktivitas'];
 
 const CreateSubscriptionScreen = () => {
-  const [selectedCategory, setSelectedCategory] = useState('Streaming');
+  const [name, setName] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Hiburan');
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [billingDate, setBillingDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [price, setPrice] = useState('');
 
+  const { addSubscription, isLoading } = useSubscriptionStore();
+
   const formatPrice = (text: string) => {
     const numbers = text.replace(/\D/g, '');
     return numbers.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   };
+
+  const handleSave = async () => {
+    if (!name.trim()) {
+      Alert.alert('Validasi', 'Nama layanan tidak boleh kosong');
+      return;
+    }
+    
+    // Parse price to integer, e.g. "150.000" -> 150000
+    const numericPrice = parseInt(price.replace(/\./g, '')) || 0;
+    if (numericPrice <= 0) {
+      Alert.alert('Validasi', 'Harga harus lebih besar dari 0');
+      return;
+    }
+
+    try {
+      await addSubscription({
+        name,
+        cost: numericPrice,
+        billingCycle: 'monthly',
+        nextBillingDate: billingDate.toISOString(),
+        category: selectedCategory,
+        notifyBefore: reminderEnabled ? 2 : 0, // as configured in UI (2 days before)
+      });
+
+      Alert.alert('Sukses', 'Langganan berhasil ditambahkan!', [
+        { text: 'OK', onPress: () => router.back() }
+      ]);
+    } catch (error) {
+      Alert.alert('Gagal', error instanceof Error ? error.message : 'Terjadi kesalahan');
+    }
+  };
+
+  const setPopular = (popularName: string, catName: string) => {
+    setName(popularName);
+    setSelectedCategory(catName);
+  };
+
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <View className="mb-10 px-4 pt-4">
@@ -41,7 +82,7 @@ const CreateSubscriptionScreen = () => {
           </Text>
           <View className="flex-row flex-wrap gap-3">
             {/* Disney+ */}
-            <Pressable className="flex-row items-center gap-3 rounded-xl bg-surface-container-lowest p-2 pr-4 shadow-sm active:opacity-70">
+            <Pressable onPress={() => setPopular('Disney+', 'Hiburan')} className="flex-row items-center gap-3 rounded-xl bg-surface-container-lowest p-2 pr-4 shadow-sm active:opacity-70">
               <View className="h-10 w-10 overflow-hidden rounded-lg bg-indigo-900">
                 <Image
                   source={{
@@ -55,7 +96,7 @@ const CreateSubscriptionScreen = () => {
             </Pressable>
 
             {/* HBO Max */}
-            <Pressable className="flex-row items-center gap-3 rounded-xl bg-surface-container-lowest p-2 pr-4 shadow-sm active:opacity-70">
+            <Pressable onPress={() => setPopular('HBO Max', 'Hiburan')} className="flex-row items-center gap-3 rounded-xl bg-surface-container-lowest p-2 pr-4 shadow-sm active:opacity-70">
               <View className="h-10 w-10 overflow-hidden rounded-lg bg-black">
                 <Image
                   source={{
@@ -69,7 +110,7 @@ const CreateSubscriptionScreen = () => {
             </Pressable>
 
             {/* YouTube Premium */}
-            <Pressable className="flex-row items-center gap-3 rounded-xl bg-surface-container-lowest p-2 pr-4 shadow-sm active:opacity-70">
+            <Pressable onPress={() => setPopular('YouTube Premium', 'Hiburan')} className="flex-row items-center gap-3 rounded-xl bg-surface-container-lowest p-2 pr-4 shadow-sm active:opacity-70">
               <View className="h-10 w-10 overflow-hidden rounded-lg bg-red-600">
                 <Image
                   source={{
@@ -97,7 +138,8 @@ const CreateSubscriptionScreen = () => {
               className="h-16 w-full rounded-xl bg-surface-container-lowest px-5 text-lg font-semibold"
               placeholder="Contoh: Spotify, Netflix"
               placeholderTextColor={colors.outline.DEFAULT}
-              defaultValue="Netflix"
+              value={name}
+              onChangeText={setName}
             />
             <View className="absolute right-4 top-4 h-8 w-8 overflow-hidden rounded-md bg-slate-900">
               <Image
@@ -127,7 +169,7 @@ const CreateSubscriptionScreen = () => {
                     : 'bg-surface-container-highest'
                 }`}
               >
-                <Text
+                 <Text
                   className={`text-sm font-medium ${
                     selectedCategory === cat ? 'text-white' : 'text-on-surface-variant'
                   }`}
@@ -214,15 +256,25 @@ const CreateSubscriptionScreen = () => {
 
       {/* Buttons */}
       <View className="mt-4 px-4 pb-10">
-        <Pressable className="overflow-hidden rounded-2xl shadow-xl active:opacity-90">
+        <Pressable 
+          onPress={handleSave}
+          disabled={isLoading}
+          className={`overflow-hidden rounded-2xl shadow-xl active:opacity-90 ${isLoading ? 'opacity-70' : ''}`}
+        >
           <LinearGradient
             colors={[colors.primary.DEFAULT, colors.primary.container]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             className="h-16 flex-row items-center justify-center gap-2"
           >
-            <Text className="font-headline text-lg font-bold text-white">Simpan Langganan</Text>
-            <MaterialIcons name="check-circle" size={22} color="white" />
+            {isLoading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <>
+                <Text className="font-headline text-lg font-bold text-white">Simpan Langganan</Text>
+                <MaterialIcons name="check-circle" size={22} color="white" />
+              </>
+            )}
           </LinearGradient>
         </Pressable>
 
