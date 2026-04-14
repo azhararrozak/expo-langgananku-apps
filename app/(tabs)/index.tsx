@@ -1,10 +1,109 @@
-import { View, Text, Image, ScrollView } from 'react-native';
+import { View, Text, Image, ScrollView, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { colors } from '../../utils/color';
+import { useEffect, useMemo, useState } from 'react';
+import { useSubscriptionStore } from '../../store/useSubscriptionStore';
+import { getMonthlySpending, MonthlySpendingData } from '../../services/dashboardService';
 
 export default function HomeScreen() {
+  const { subscriptions, fetchSubscriptions } = useSubscriptionStore();
+
+  // Dashboard API Stats
+  const [monthlySpending, setMonthlySpending] = useState<MonthlySpendingData[]>([]);
+  const [chartRange, setChartRange] = useState<3 | 6>(6);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    fetchSubscriptions();
+    
+    getMonthlySpending()
+      .then(res => {
+        if (res && res.data) setMonthlySpending(res.data);
+      })
+      .catch(console.error);
+  }, []);
+
+  const chartData = useMemo(() => {
+    if (!monthlySpending.length) return [];
+    return monthlySpending.slice(-chartRange);
+  }, [monthlySpending, chartRange]);
+
+  const maxSpending = useMemo(() => {
+    if (!chartData.length) return 1;
+    return Math.max(...chartData.map(d => d.total), 1);
+  }, [chartData]);
+
+  const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
+
+  const totalMonthlyCost = useMemo(() => {
+    return activeSubscriptions.reduce((sum, sub) => {
+      if (sub.billingCycle === 'yearly') return sum + (sub.cost / 12);
+      return sum + sub.cost;
+    }, 0);
+  }, [activeSubscriptions]);
+
+  const nearestSubscriptions = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return [...activeSubscriptions]
+      .filter(sub => new Date(sub.nextBillingDate).getTime() >= today.getTime())
+      .sort((a, b) => {
+         return new Date(a.nextBillingDate).getTime() - new Date(b.nextBillingDate).getTime();
+      });
+  }, [activeSubscriptions]);
+
+  const nearestBilling = nearestSubscriptions.length > 0 ? nearestSubscriptions[0] : null;
+
+  const soonExpiringCount = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const sevenDaysFromNow = new Date(today);
+    sevenDaysFromNow.setDate(today.getDate() + 7);
+
+    return activeSubscriptions.filter(sub => {
+      const billingDate = new Date(sub.nextBillingDate);
+      return billingDate >= today && billingDate <= sevenDaysFromNow;
+    }).length;
+  }, [activeSubscriptions]);
+
+  const mostExpensive = useMemo(() => {
+    if (activeSubscriptions.length === 0) return null;
+    return activeSubscriptions.reduce((prev, current) => {
+      const currentCost = current.billingCycle === 'yearly' ? current.cost / 12 : current.cost;
+      const prevCost = prev.billingCycle === 'yearly' ? prev.cost / 12 : prev.cost;
+      return currentCost > prevCost ? current : prev;
+    });
+  }, [activeSubscriptions]);
+
+  // formatter
+  const formatCurrency = (amount: number) => {
+    return `Rp ${Math.round(amount).toLocaleString('id-ID')}`;
+  };
+
+  const getRelativeDate = (dateString: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const targetDate = new Date(dateString);
+    targetDate.setHours(0, 0, 0, 0);
+
+    const diffTime = targetDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Hari Ini';
+    if (diffDays === 1) return 'Besok';
+    if (diffDays > 1) return `${diffDays} Hari`;
+    if (diffDays < 0) return 'Terlewat';
+    return '-';
+  };
+
+  const formatShortDate = (dateString: string) => {
+    const d = new Date(dateString);
+    return `Perpanjang ${d.getDate()} ${d.toLocaleString('id-ID', { month: 'short' })}`;
+  };
+
   return (
     // <SafeAreaView className="flex-1" edges={['top']}>
       <ScrollView 
@@ -23,86 +122,93 @@ export default function HomeScreen() {
               Total Bulanan Ini
             </Text>
             <Text className="mb-6 font-headline text-4xl font-extrabold tracking-tight text-white">
-              Rp 100.000
+              {formatCurrency(totalMonthlyCost)}
             </Text>
             <View className="w-full flex-row gap-2">
               <View className="w-1/2 flex-col items-center  justify-center rounded-xl bg-white/10 p-2 backdrop-blur-md">
                 <MaterialIcons name="warning" size={24} color="yellow" />
                 <Text className="my-2 text-center text-sm font-bold uppercase text-white">
-                  3 Langganan Segera Berakhir
+                  {soonExpiringCount} Langganan Segera Berakhir
                 </Text>
               </View>
               <View className="w-1/2 flex-col items-center justify-center rounded-xl bg-white/10 p-2 backdrop-blur-md">
                 <AntDesign name="rise" size={24} color="yellow" />
                 <Text className="my-2 text-center text-sm font-bold uppercase text-white">
-                  Paling Mahal! Netflix
+                  Paling Mahal! {mostExpensive ? mostExpensive.name : '-'}
                 </Text>
               </View>
             </View>
           </LinearGradient>
         </View>
 
-        <View className="w-full">
-          <View className="flex-row items-center justify-between">
+        <View className="w-full z-10">
+          <View className="flex-row items-center justify-between z-10">
             <Text className="text-on-surface font-headline text-lg font-bold">
               Tren Pengeluaran
             </Text>
-            <View className="flex-row items-center gap-2 rounded-full bg-primary-fixed pl-2">
-              <Text className="text-sm font-bold uppercase text-primary">6 Bulan Terakhir</Text>
-              <MaterialIcons name="arrow-drop-down" size={24} color="#757684" />
+            <View className="relative z-10">
+               <Pressable 
+                 onPress={() => setShowDropdown(!showDropdown)} 
+                 className="flex-row items-center gap-2 rounded-full bg-primary-fixed pl-3 pr-1 py-1.5"
+               >
+                 <Text className="text-sm font-bold uppercase text-primary ml-1">{chartRange} Bulan Terakhir</Text>
+                 <MaterialIcons name={showDropdown ? "arrow-drop-up" : "arrow-drop-down"} size={22} color={colors.primary.DEFAULT} />
+               </Pressable>
+               
+               {showDropdown && (
+                  <View className="absolute top-10 right-0 w-44 bg-surface-container-highest rounded-xl shadow-lg border border-outline-variant/30 z-50 overflow-hidden">
+                     <Pressable 
+                       onPress={() => { setChartRange(3); setShowDropdown(false); }} 
+                       className="px-4 py-3 border-b border-outline-variant/10 active:bg-surface-container-highest"
+                     >
+                        <Text className="text-sm text-on-surface font-bold tracking-wide">3 Bulan Terakhir</Text>
+                     </Pressable>
+                     <Pressable 
+                       onPress={() => { setChartRange(6); setShowDropdown(false); }} 
+                       className="px-4 py-3 active:bg-surface-container-highest"
+                     >
+                        <Text className="text-sm text-on-surface font-bold tracking-wide">6 Bulan Terakhir</Text>
+                     </Pressable>
+                  </View>
+               )}
             </View>
           </View>
-          <View className="mt-3 w-full overflow-hidden rounded-[2rem] bg-surface-container-lowest p-6">
-            {/* Chart */}
-            <View className="h-40 w-full flex-row items-end justify-between gap-1 px-2">
-              {/* Jan */}
-              <View className="flex-1 items-center">
-                <View className="h-24 w-1.5 overflow-hidden rounded-full bg-slate-100">
-                  <View className="absolute bottom-0 h-12 w-full rounded-full bg-secondary-fixed-dim" />
-                </View>
-                <Text className="mt-2 text-[10px] font-medium text-on-surface-variant">Jan</Text>
+          
+          {/* Chart Wrapper - Lower z-index so dropdown appears over it */}
+          <View className="mt-3 w-full overflow-hidden rounded-[2rem] bg-surface-container-lowest p-6 z-0">
+            {chartData.length > 0 ? (
+              <View className="h-40 w-full flex-row items-end justify-between gap-1 px-2">
+                {chartData.map((data, index) => {
+                  const isLast = index === chartData.length - 1;
+                  const barHeight = (data.total / maxSpending) * 96; // 96 is roughly h-24
+                  const shortLabel = data.label.split(' ')[0]; // Extract "Jan" from "Jan 2026"
+                  
+                  return (
+                    <View key={`${data.year}-${data.month}`} className="flex-1 items-center">
+                      <View className="h-24 w-1.5 overflow-hidden rounded-full bg-slate-100">
+                        {/* the animated filled bar */}
+                        <View 
+                          style={{ height: Math.max(barHeight, 4) }} 
+                          className={`absolute bottom-0 w-full rounded-full ${isLast ? 'bg-primary-container' : 'bg-secondary-fixed-dim'}`} 
+                        />
+                      </View>
+                      <Text className={`mt-2 text-[10px] ${isLast ? 'font-bold text-primary' : 'font-medium text-on-surface-variant'}`}>
+                        {shortLabel}
+                      </Text>
+                    </View>
+                  );
+                })}
               </View>
-              {/* Feb */}
-              <View className="flex-1 items-center">
-                <View className="h-24 w-1.5 overflow-hidden rounded-full bg-slate-100">
-                  <View className="absolute bottom-0 h-16 w-full rounded-full bg-secondary-fixed-dim" />
-                </View>
-                <Text className="mt-2 text-[10px] font-medium text-on-surface-variant">Feb</Text>
-              </View>
-              {/* Mar */}
-              <View className="flex-1 items-center">
-                <View className="h-24 w-1.5 overflow-hidden rounded-full bg-slate-100">
-                  <View className="absolute bottom-0 h-20 w-full rounded-full bg-secondary-fixed-dim" />
-                </View>
-                <Text className="mt-2 text-[10px] font-medium text-on-surface-variant">Mar</Text>
-              </View>
-              {/* Apr */}
-              <View className="flex-1 items-center">
-                <View className="h-24 w-1.5 overflow-hidden rounded-full bg-slate-100">
-                  <View className="absolute bottom-0 h-14 w-full rounded-full bg-secondary-fixed-dim" />
-                </View>
-                <Text className="mt-2 text-[10px] font-medium text-on-surface-variant">Apr</Text>
-              </View>
-              {/* Mei - Active */}
-              <View className="flex-1 items-center">
-                <View className="h-24 w-1.5 overflow-hidden rounded-full bg-slate-100">
-                  <View className="absolute bottom-0 h-24 w-full rounded-full bg-primary-container" />
-                </View>
-                <Text className="mt-2 text-[10px] font-bold text-primary">Mei</Text>
-              </View>
-              {/* Jun */}
-              <View className="flex-1 items-center">
-                <View className="h-24 w-1.5 overflow-hidden rounded-full bg-slate-100">
-                  <View className="absolute bottom-0 h-8 w-full rounded-full bg-slate-300" />
-                </View>
-                <Text className="mt-2 text-[10px] font-medium text-on-surface-variant">Jun</Text>
-              </View>
-            </View>
+            ) : (
+               <View className="h-40 w-full justify-center items-center">
+                  <Text className="text-on-surface-variant font-medium">Memuat data statistik...</Text>
+               </View>
+            )}
           </View>
         </View>
 
         {/* Grid Cards */}
-        <View className="w-full flex-row gap-4">
+        <View className="w-full flex-row gap-4 mt-2">
           {/* Paling Mahal */}
           <View className="aspect-square flex-1 justify-between rounded-3xl bg-surface-container-low p-5">
             <View className="h-10 w-10 items-center justify-center rounded-2xl bg-primary-fixed">
@@ -110,9 +216,11 @@ export default function HomeScreen() {
             </View>
             <View>
               <Text className="text-xs font-medium text-on-surface-variant">Paling Mahal</Text>
-              <Text className="mt-1 font-headline text-lg font-bold leading-tight">Rp 186.000</Text>
+              <Text className="mt-1 font-headline text-lg font-bold leading-tight">
+                {mostExpensive ? formatCurrency(mostExpensive.cost) : 'Rp 0'}
+              </Text>
               <Text className="text-[10px] font-bold uppercase tracking-wider text-secondary">
-                Netflix Premium
+                {mostExpensive ? mostExpensive.name : '-'}
               </Text>
             </View>
           </View>
@@ -121,14 +229,20 @@ export default function HomeScreen() {
           <View className="aspect-square flex-1 justify-between rounded-3xl border border-outline-variant/20 bg-surface-container-lowest p-5">
             <View className="flex-row items-start justify-between">
               <MaterialIcons name="event" size={24} color={colors.error.DEFAULT} />
-              <View className="rounded-lg bg-error-container px-2 py-1">
-                <Text className="text-[10px] font-bold text-on-error-container">Besok</Text>
+              <View className={`rounded-lg px-2 py-1 ${nearestBilling ? 'bg-error-container' : 'bg-surface-container-highest'}`}>
+                <Text className={`text-[10px] font-bold ${nearestBilling ? 'text-on-error-container' : 'text-on-surface-variant'}`}>
+                  {nearestBilling ? getRelativeDate(nearestBilling.nextBillingDate) : '-'}
+                </Text>
               </View>
             </View>
             <View>
               <Text className="text-xs font-medium text-on-surface-variant">Tagihan Terdekat</Text>
-              <Text className="mt-1 font-headline text-lg font-bold leading-tight">Spotify</Text>
-              <Text className="text-[10px] font-medium text-on-surface-variant">Rp 54.990</Text>
+              <Text className="mt-1 font-headline text-lg font-bold leading-tight">
+                {nearestBilling ? nearestBilling.name : '-'}
+              </Text>
+              <Text className="text-[10px] font-medium text-on-surface-variant">
+                {nearestBilling ? formatCurrency(nearestBilling.cost) : 'Rp 0'}
+              </Text>
             </View>
           </View>
         </View>
@@ -139,51 +253,29 @@ export default function HomeScreen() {
             Aktivitas Terakhir
           </Text>
           <View className="gap-4">
-            {/* Netflix */}
-            <View className="flex-row items-center justify-between rounded-2xl bg-surface-container-lowest p-4">
-              <View className="flex-row items-center gap-4">
-                <View className="h-12 w-12 items-center justify-center rounded-xl bg-slate-100">
-                  <Image
-                    source={{
-                      uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDPoWetlrXIHAwlZ-3BFCmLs9CJUQN0GH_6x0jJRkXcIBLmo-1JT23Sl9SwQ_-MtsDPEXURgODeSE6B_zedjmjNjG5zmlrDmMkQ9t7vBSCRTOT2_TrGZPia7mp1tod6uk_2C6zHPXd1Dy331txCRoGoH65FcGCHpISxjZOxsvxvI1KvCc-rziCAGuufZgBtI7noJKhoP8-LlXnchvFPZEMaNEwFkNENb__yXpzCGH-r5t0LOpetMfq3A_7IG9ATCCAh-u94s1Dj5g0',
-                    }}
-                    className="h-6 w-6"
-                    resizeMode="contain"
-                  />
+            {nearestSubscriptions.slice(0, 3).map((sub) => (
+              <View key={sub.id} className="flex-row items-center justify-between rounded-2xl bg-surface-container-lowest p-4">
+                <View className="flex-row items-center gap-4">
+                  <View className="h-12 w-12 items-center justify-center rounded-xl bg-slate-100">
+                     <Text className="text-lg font-bold text-primary">
+                       {sub.name.charAt(0).toUpperCase()}
+                     </Text>
+                  </View>
+                  <View>
+                    <Text className="text-on-surface font-bold">{sub.name}</Text>
+                    <Text className="text-xs text-on-surface-variant">{formatShortDate(sub.nextBillingDate)}</Text>
+                  </View>
                 </View>
-                <View>
-                  <Text className="text-on-surface font-bold">Netflix</Text>
-                  <Text className="text-xs text-on-surface-variant">Perpanjang 21 Mei</Text>
-                </View>
-              </View>
-              <View className="items-end">
-                <Text className="text-on-surface font-bold">Rp 186rb</Text>
-                <Text className="text-[10px] font-bold uppercase text-secondary">Berlangganan</Text>
-              </View>
-            </View>
-
-            {/* Disney+ */}
-            <View className="flex-row items-center justify-between rounded-2xl bg-surface-container-lowest p-4">
-              <View className="flex-row items-center gap-4">
-                <View className="h-12 w-12 items-center justify-center rounded-xl bg-slate-100">
-                  <Image
-                    source={{
-                      uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDQg4Y47J7XNHvDsvqohZfAXaiHRVJqlStiyYUqaKG0TkKGZITQW7TWhN3Xxu06H5kIizYLhzd0SLl_2zdqc11RE2KoT4bdYVB-w2mQt1dQx1E6Py6iDNus77jv-5gZmczE1R7kwQ3CW-rEcO2LGGW6eHKe3NkOczheHjKL-9sH6_sOf8GPEhYzfjKwOx0Ir-DrSDNyaPtnYF_U_S11PZopA6WLcykIF1haCWO7hwCq_Hmh_OrbdDHgjFpL4I2DmGSL2jq0NUS09to',
-                    }}
-                    className="h-6 w-6"
-                    resizeMode="contain"
-                  />
-                </View>
-                <View>
-                  <Text className="text-on-surface font-bold">Disney+</Text>
-                  <Text className="text-xs text-on-surface-variant">Perpanjang 24 Mei</Text>
+                <View className="items-end">
+                  <Text className="text-on-surface font-bold">{formatCurrency(sub.cost)}</Text>
+                  <Text className="text-[10px] font-bold uppercase text-secondary">Berlangganan</Text>
                 </View>
               </View>
-              <View className="items-end">
-                <Text className="text-on-surface font-bold">Rp 39rb</Text>
-                <Text className="text-[10px] font-bold uppercase text-secondary">Berlangganan</Text>
-              </View>
-            </View>
+            ))}
+            
+            {nearestSubscriptions.length === 0 && (
+               <Text className="text-center text-on-surface-variant py-4 font-medium">Belum ada aktivitas terdekat.</Text>
+            )}
           </View>
         </View>
       </View>
