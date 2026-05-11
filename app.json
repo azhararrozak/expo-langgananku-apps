@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Langgananku",
-    "slug": "langgananku",
+    "slug": "langgananku-apps",
     "scheme": "langgananku",
     "version": "1.0.0",
     "web": {
@@ -36,6 +36,13 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.azhara.langgananku"
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7fc84f01-f5f4-4b23-8c83-a7c8efda45aa"
+      }
+    },
+    "owner": "satudev"
   }
 }

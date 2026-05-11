@@ -21,8 +21,7 @@ import { useAuthStore } from '../store/useAuthStore';
 // Untuk iOS simulator:    'http://localhost:3000'
 // Untuk device fisik:     'http://<IP-KOMPUTER-KAMU>:3000'
 // const BASE_URL = 'http://10.0.2.2:3000';
-// Prod BASE_URL https://api.langgananku-app.web.id
-const BASE_URL = 'https://api.langgananku-app.web.id';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 /**
  * Fungsi utama untuk melakukan HTTP request ke backend
