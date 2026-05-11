@@ -169,7 +169,7 @@ const ReportsScreen = () => {
 
             {/* Action Button */}
             {topCategories.length > 0 && (
-              <Pressable className="mt-8 w-full flex-row items-center justify-center gap-2 rounded-2xl bg-secondary-fixed px-6 py-3">
+              <Pressable onPress={() => router.push('/(tabs)/reports/details')} className="mt-8 w-full flex-row items-center justify-center gap-2 rounded-2xl bg-secondary-fixed px-6 py-3">
                 <Text className="font-bold text-on-secondary-fixed">View All Analytics</Text>
                 <MaterialIcons name="arrow-forward-ios" size={14} color="#000000" />
               </Pressable>
