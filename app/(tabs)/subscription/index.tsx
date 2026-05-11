@@ -51,11 +51,11 @@ const SubscriptionScreen = () => {
       <ScrollView showsVerticalScrollIndicator={false}>
       <View className="w-full flex-col p-4">
         <Text className="mb-2 font-label text-sm uppercase tracking-widest text-on-surface-variant">
-          Portofolio Overview
+          Ringkasan Portofolio
         </Text>
         <View className="flex-row items-center justify-between">
           <Text className="text-on-surface w-[15rem] font-headline text-4xl font-extrabold tracking-tight">
-          Active Subscriptions
+          Langganan Aktif
         </Text>
         <Pressable onPress={() => router.push('/subscription/create')} className="bg-primary/10 p-2 rounded-full">
           <MaterialIcons name="add" size={24} color={colors.primary.DEFAULT} />
@@ -71,7 +71,7 @@ const SubscriptionScreen = () => {
           {entertainmentSubs.length > 0 && (
             <View className="gap-6 px-4 pb-12">
               <Text className="px-1 font-headline text-sm font-bold uppercase tracking-widest text-on-surface-variant">
-                Entertainment & Media
+                Hiburan & Media
               </Text>
 
               {entertainmentSubs.map((sub) => (
@@ -110,7 +110,7 @@ const SubscriptionScreen = () => {
                           <View className="flex-row items-end justify-between">
                             <View className="gap-1 flex-1 pr-4">
                               <Text className="font-label text-[10px] uppercase tracking-widest text-white/70">
-                                Subscription
+                                Langganan
                               </Text>
                               <Text className="font-headline text-sm font-bold text-white" numberOfLines={1}>
                                 {sub.name.toUpperCase()}
@@ -118,10 +118,10 @@ const SubscriptionScreen = () => {
                             </View>
                             <View className="items-end gap-1">
                               <Text className="font-label text-[10px] uppercase tracking-widest text-white/70">
-                                Next Due
+                                Jatuh Tempo
                               </Text>
                               <Text className="font-mono text-sm text-white">
-                                {new Date(sub.nextBillingDate).toLocaleDateString('en-GB', { month: '2-digit', year: '2-digit' })}
+                                {new Date(sub.nextBillingDate).toLocaleDateString('id-ID', { month: '2-digit', year: '2-digit' })}
                               </Text>
                             </View>
                           </View>
@@ -138,7 +138,7 @@ const SubscriptionScreen = () => {
           {utilitySubs.length > 0 && (
             <View className="gap-6 px-4 pb-12">
               <Text className="px-1 font-headline text-sm font-bold uppercase tracking-widest text-on-surface-variant">
-                Utilities & Services
+                Utilitas & Layanan
               </Text>
 
               <View className="flex-row flex-wrap gap-4 justify-between">
@@ -166,9 +166,9 @@ const SubscriptionScreen = () => {
                         </View>
                         
                         <View className="mt-1 items-center">
-                           <Text className="text-[9px] uppercase font-bold text-on-surface-variant">Next Payment</Text>
+                           <Text className="text-[9px] uppercase font-bold text-on-surface-variant">Pembayaran Berikutnya</Text>
                            <Text className="font-mono text-xs font-bold text-gray-700 mt-1">
-                             {new Date(sub.nextBillingDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                             {new Date(sub.nextBillingDate).toLocaleDateString('id-ID', { month: 'short', day: 'numeric', year: 'numeric' })}
                            </Text>
                         </View>
                       </View>

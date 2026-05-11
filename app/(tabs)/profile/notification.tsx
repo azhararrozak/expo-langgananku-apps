@@ -97,7 +97,7 @@ export default function NotificationScreen() {
             <View className="flex-1 pr-4">
               <Text className="mb-1 text-base font-bold text-on-surface">Ubah Waktu Pengingat</Text>
               <Text className="text-sm text-on-surface-variant">
-                Saat ini: 09:00 AM (Segera Hadir)
+                Saat ini: 09:00 Pagi (Segera Hadir)
               </Text>
             </View>
             <MaterialIcons name="chevron-right" size={24} color={colors.outline.DEFAULT} />

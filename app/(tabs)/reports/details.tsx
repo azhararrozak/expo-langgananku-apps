@@ -113,7 +113,7 @@ const AllCategoriesView = ({ subscriptions }: { subscriptions: any[] }) => {
         <Text className="text-sm font-medium text-on-surface-variant">Total pengeluaran bulanan</Text>
       </View>
 
-      <Text className="mb-4 font-headline text-lg font-bold text-on-surface">Breakdown Kategori</Text>
+      <Text className="mb-4 font-headline text-lg font-bold text-on-surface">Rincian Kategori</Text>
       <View className="gap-3 mb-10">
         {categories.map(cat => (
           <Pressable
@@ -168,7 +168,7 @@ const CategoryDetailsScreen = () => {
           <MaterialIcons name="arrow-back" size={24} color={colors['on-background']} />
         </Pressable>
         <Text className="text-lg font-bold text-on-surface">
-          {isOverview ? 'All Analytics' : 'Detail Kategori'}
+          {isOverview ? 'Semua Analitik' : 'Detail Kategori'}
         </Text>
         <View className="w-10" />
       </View>

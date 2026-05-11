@@ -27,7 +27,7 @@ export default function ProfileScreen() {
       <ScrollView className="flex-1 px-4 pt-4" showsVerticalScrollIndicator={false}>
         <View className="flex-col gap-2"></View>
         <Text className="font-manrope text-sm font-bold uppercase tracking-widest text-primary">
-          Active Account
+          Akun Aktif
         </Text>
         <Text className="font-manrope text-on-surface text-4xl font-extrabold capitalize tracking-tight">
           {user?.username || 'Username'}
@@ -39,13 +39,13 @@ export default function ProfileScreen() {
           {/* Account Settings */}
           <View>
             <Text className="font-manrope mb-4 pl-1 text-lg font-bold text-indigo-900">
-              Account Settings
+              Pengaturan Akun
             </Text>
             <View className="overflow-hidden rounded-xl bg-surface-container-low">
               <TouchableOpacity className="w-full flex-row items-center justify-between p-5">
                 <View className="flex-row items-center gap-4">
                   <MaterialIcons name="person" size={24} color={colors.primary.DEFAULT} />
-                  <Text className="text-on-surface font-medium">Edit Profile</Text>
+                  <Text className="text-on-surface font-medium">Edit Profil</Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={24} color={colors.outline.DEFAULT} />
               </TouchableOpacity>
@@ -53,7 +53,7 @@ export default function ProfileScreen() {
               <TouchableOpacity className="w-full flex-row items-center justify-between p-5">
                 <View className="flex-row items-center gap-4">
                   <MaterialIcons name="lock" size={24} color={colors.primary.DEFAULT} />
-                  <Text className="text-on-surface font-medium">Change Password</Text>
+                  <Text className="text-on-surface font-medium">Ubah Kata Sandi</Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={24} color={colors.outline.DEFAULT} />
               </TouchableOpacity>
@@ -63,13 +63,13 @@ export default function ProfileScreen() {
           {/* Subscription Preferences */}
           <View>
             <Text className="font-manrope mb-4 pl-1 text-lg font-bold text-indigo-900">
-              Subscription Preferences
+              Preferensi Langganan
             </Text>
             <View className="overflow-hidden rounded-xl bg-surface-container-low">
               <TouchableOpacity className="w-full flex-row items-center justify-between p-5">
                 <View className="flex-row items-center gap-4">
                   <MaterialIcons name="payments" size={24} color={colors.primary.DEFAULT} />
-                  <Text className="text-on-surface font-medium">Default Currency</Text>
+                  <Text className="text-on-surface font-medium">Mata Uang Utama</Text>
                 </View>
                 <View className="flex-row items-center gap-2">
                   <Text className="text-sm text-on-surface-variant">IDR (Rp)</Text>
@@ -86,7 +86,7 @@ export default function ProfileScreen() {
                     size={24}
                     color={colors.primary.DEFAULT}
                   />
-                  <Text className="text-on-surface font-medium">Notification Settings</Text>
+                  <Text className="text-on-surface font-medium">Pengaturan Notifikasi</Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={24} color={colors.outline.DEFAULT} />
               </TouchableOpacity>
@@ -96,7 +96,7 @@ export default function ProfileScreen() {
           {/* App Info & Support */}
           <View>
             <Text className="font-manrope mb-4 pl-1 text-lg font-bold text-indigo-900">
-              App Info
+              Info Aplikasi
             </Text>
             <View className="overflow-hidden rounded-xl bg-surface-container-low">
               <TouchableOpacity
@@ -104,7 +104,7 @@ export default function ProfileScreen() {
                 onPress={() => router.push('/(tabs)/profile/about')}>
                 <View className="flex-row items-center gap-4">
                   <MaterialIcons name="info" size={24} color={colors.primary.DEFAULT} />
-                  <Text className="text-on-surface font-medium">About Langgananku</Text>
+                  <Text className="text-on-surface font-medium">Tentang Langgananku</Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={24} color={colors.outline.DEFAULT} />
               </TouchableOpacity>
@@ -114,7 +114,7 @@ export default function ProfileScreen() {
                 onPress={() => router.push('/(tabs)/profile/privacypolicy')}>
                 <View className="flex-row items-center gap-4">
                   <MaterialIcons name="verified-user" size={24} color={colors.primary.DEFAULT} />
-                  <Text className="text-on-surface font-medium">Privacy Policy</Text>
+                  <Text className="text-on-surface font-medium">Kebijakan Privasi</Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={24} color={colors.outline.DEFAULT} />
               </TouchableOpacity>
@@ -124,7 +124,7 @@ export default function ProfileScreen() {
                 onPress={handleLogout}>
                 <View className="flex-row items-center gap-4">
                   <MaterialIcons name="logout" size={24} color={colors.error.DEFAULT} />
-                  <Text className="font-semibold text-error">Logout</Text>
+                  <Text className="font-semibold text-error">Keluar</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -133,7 +133,7 @@ export default function ProfileScreen() {
           {/* App Version */}
           <View className="flex-col items-center">
             <Text className="font-label text-sm capitalize tracking-widest text-outline">
-              Version 1.0.0 (Build 1)
+              Versi 1.0.0 (Build 1)
             </Text>
           </View>
         </View>

@@ -77,10 +77,10 @@ const ReportsScreen = () => {
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
         <View className="mb-10 mt-2 flex-col p-4">
           <Text className="font-label text-sm uppercase tracking-wider text-on-surface-variant">
-            Financial Insight
+            Analisis Keuangan
           </Text>
           <Text className="font-headline text-4xl font-extrabold tracking-tight text-primary">
-            Monthly Reports
+            Laporan Bulanan
           </Text>
 
           {/* Spending Summary Card */}
@@ -90,13 +90,13 @@ const ReportsScreen = () => {
 
             <View className="relative z-10">
               <Text className="mb-5 font-headline text-sm font-bold uppercase tracking-widest text-on-surface-variant">
-                Spending Summary
+                Ringkasan Pengeluaran
               </Text>
 
               <View className="flex-col gap-4">
                 <View>
                   <Text className="text-sm font-medium text-on-surface-variant">
-                    Total This Month
+                    Total Bulan Ini
                   </Text>
                   <Text className="mt-1 font-headline text-4xl font-extrabold text-primary">
                     Rp {totalCost.toLocaleString('id-ID')}
@@ -104,15 +104,27 @@ const ReportsScreen = () => {
                 </View>
 
                 {isDashboardLoading ? (
-                  <ActivityIndicator size="small" color={colors.secondary.DEFAULT} className="self-start" />
+                  <ActivityIndicator
+                    size="small"
+                    color={colors.secondary.DEFAULT}
+                    className="self-start"
+                  />
                 ) : trend ? (
                   <View className="flex-row items-center gap-2 self-start rounded-full bg-secondary-container/40 px-4 py-2">
-                    <MaterialIcons 
-                      name={trend.direction === 'up' ? 'trending-up' : trend.direction === 'down' ? 'trending-down' : 'trending-flat'} 
-                      size={20} 
-                      color={colors.secondary.DEFAULT} 
+                    <MaterialIcons
+                      name={
+                        trend.direction === 'up'
+                          ? 'trending-up'
+                          : trend.direction === 'down'
+                            ? 'trending-down'
+                            : 'trending-flat'
+                      }
+                      size={20}
+                      color={colors.secondary.DEFAULT}
                     />
-                    <Text className="text-sm font-bold text-secondary">{trend.percentage}% vs last month</Text>
+                    <Text className="text-sm font-bold text-secondary">
+                      {trend.percentage}% dari bulan lalu
+                    </Text>
                   </View>
                 ) : null}
               </View>
@@ -120,14 +132,14 @@ const ReportsScreen = () => {
               {/* Spending Pulse */}
               <View className="mt-8">
                 <View className="mb-3 flex-row items-center justify-between">
-                  <Text className="text-on-surface text-sm font-bold">Budget Utilization</Text>
+                  <Text className="text-on-surface text-sm font-bold">Penggunaan Anggaran</Text>
                   <Text className="text-sm font-medium text-on-surface-variant">
                     Rp {totalCost.toLocaleString('id-ID')} / 2.000.000
                   </Text>
                 </View>
                 <View className="h-4 w-full overflow-hidden rounded-full bg-secondary-container/30">
-                  <View 
-                    className="h-full rounded-full bg-secondary shadow-sm" 
+                  <View
+                    className="h-full rounded-full bg-secondary shadow-sm"
                     style={{ width: `${budgetUtilization}%` }}
                   />
                 </View>
@@ -139,24 +151,34 @@ const ReportsScreen = () => {
           <View className="mt-4 flex-col justify-between rounded-[2rem] bg-primary p-6 shadow-md">
             <View>
               <Text className="mb-6 font-headline text-lg font-bold text-on-primary">
-                Top Categories
+                Kategori Teratas
               </Text>
 
               {isLoading ? (
                 <ActivityIndicator size="large" color="white" />
               ) : topCategories.length === 0 ? (
-                <Text className="text-on-primary text-center my-4 opacity-80">Belum ada data langganan.</Text>
+                <Text className="my-4 text-center text-on-primary opacity-80">
+                  Belum ada data langganan.
+                </Text>
               ) : (
                 <View className="flex-col gap-5">
                   {topCategories.map((cat) => (
-                    <Pressable 
-                      key={cat.name} 
+                    <Pressable
+                      key={cat.name}
                       className="flex-row items-center justify-between active:opacity-70"
-                      onPress={() => router.push({ pathname: '/(tabs)/reports/details', params: { category: cat.name } })}
-                    >
+                      onPress={() =>
+                        router.push({
+                          pathname: '/(tabs)/reports/details',
+                          params: { category: cat.name },
+                        })
+                      }>
                       <View className="flex-row items-center gap-3">
                         <View className="rounded-xl bg-white/10 p-2">
-                          <MaterialIcons name={getCategoryIcon(cat.name)} size={20} color={colors.secondary.DEFAULT} />
+                          <MaterialIcons
+                            name={getCategoryIcon(cat.name)}
+                            size={20}
+                            color={colors.secondary.DEFAULT}
+                          />
                         </View>
                         <Text className="text-base font-medium text-on-primary">{cat.name}</Text>
                       </View>
@@ -169,8 +191,10 @@ const ReportsScreen = () => {
 
             {/* Action Button */}
             {topCategories.length > 0 && (
-              <Pressable onPress={() => router.push('/(tabs)/reports/details')} className="mt-8 w-full flex-row items-center justify-center gap-2 rounded-2xl bg-secondary-fixed px-6 py-3">
-                <Text className="font-bold text-on-secondary-fixed">View All Analytics</Text>
+              <Pressable
+                onPress={() => router.push('/(tabs)/reports/details')}
+                className="mt-8 w-full flex-row items-center justify-center gap-2 rounded-2xl bg-secondary-fixed px-6 py-3">
+                <Text className="font-bold text-on-secondary-fixed">Lihat Semua Analitik</Text>
                 <MaterialIcons name="arrow-forward-ios" size={14} color="#000000" />
               </Pressable>
             )}

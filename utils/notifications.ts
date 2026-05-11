@@ -15,7 +15,7 @@ Notifications.setNotificationHandler({
 export async function requestNotificationPermissions() {
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('subscriptions', {
-      name: 'Subscriptions Reminders',
+      name: 'Pengingat Langganan',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
